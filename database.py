@@ -12,13 +12,12 @@ session = async_sessionmaker(engine, expire_on_commit=False)
 
 
 class Base(DeclarativeBase):
-    pass
+    id: Mapped[int] = mapped_column(primary_key=True)
 
 
 class CandidatesDB(Base):
     __tablename__ = 'candidates'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
     first_name = mapped_column(String(20), nullable=False)
     second_name = mapped_column(String(20), nullable=False)
     age: Mapped[int]
@@ -36,11 +35,32 @@ class CandidatesDB(Base):
 class SkillsDB(Base):
     __tablename__ = 'skills'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    candidate_id: Mapped[int] = mapped_column(ForeignKey("candidates.id", ondelete="CASCADE"))
+    foreign_key: Mapped[int] = mapped_column(ForeignKey("candidates.id", ondelete="CASCADE"))
     skill_name = mapped_column(String(30), index=True, nullable=False)
+    level: Mapped[int]
     years_of_experience: Mapped[int]
     last_used_year: Mapped[int]
+
+
+class JobOpeningsDB(Base):
+    __tablename__ = 'job_openings'
+
+    title = mapped_column(String(40), index=True, nullable=False)
+    description = mapped_column(String(1000))
+    address = mapped_column(String(100), index=True, nullable=False)
+    salary: Mapped[int] = mapped_column(index=True)
+    time_create: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now()) "))
+
+    skills: Mapped[List["RequiredSkillsDB"]] = relationship()
+
+
+class RequiredSkillsDB(Base):
+    __tablename__ = 'required_skills'
+
+    foreign_key: Mapped[int] = mapped_column(ForeignKey("job_openings.id", ondelete="CASCADE"))
+    skill_name = mapped_column(String(30), nullable=False)
+    minimal_level: Mapped[int]
+    minimal_years_of_experience: Mapped[int]
 
 
 async def create_table():

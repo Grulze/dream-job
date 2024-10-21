@@ -10,7 +10,7 @@ def partial_model(model: Type[BaseModel]):
     def make_field_optional(field: FieldInfo, default: Any = None) -> Tuple[Any, FieldInfo]:
         new = deepcopy(field)
         new.default = default
-        new.annotation = Optional[field.annotation]  # type: ignore
+        new.annotation = Optional[field.annotation]
         return new.annotation, new
     return create_model(
         f'Partial{model.__name__}',
@@ -22,21 +22,36 @@ def partial_model(model: Type[BaseModel]):
         }
     )
 
-class CRUDSkills(BaseModel):
-    candidate_id: int = Field(gt=0)
+
+class Pagination(BaseModel):
+    limit: int = Field(gt=0, default=10)
+    page: int = Field(ge=0, default=0)
+
+
+class Skills(BaseModel):
     skill_name: str = Field(min_length=3, max_length=30)
+    level: int = Field(ge=0, le=2)
     years_of_experience: int = Field(gt=0)
     last_used_year: int = Field(gt=1950, le=2024)
 
 
-class RelationshipSkills(CRUDSkills):
-    skill_id: int
+@partial_model
+class PATCHSkills(Skills):
+    pass
 
 
-class UpdateCandidates(BaseModel):
+class GetCandidatesSkills(Skills):
+    id: int
+
+
+class GetSkills(Skills):
+    foreign_key: int
+
+
+class Candidates(BaseModel):
     first_name: str = Field(min_length=3, max_length=20)
     second_name: str = Field(min_length=3, max_length=20)
-    age: int = Field(gt=16, le=100)
+    age: int = Field(ge=16, le=100)
     status: int = Field(ge=0, le=4)
     desired_position: str = Field(min_length=4, max_length=30)
     education_degree: int = Field(ge=0, le=8)
@@ -46,22 +61,56 @@ class UpdateCandidates(BaseModel):
 
 
 @partial_model
-class PATCHCandidates(UpdateCandidates):
+class PATCHCandidates(Candidates):
     pass
-#     first_name: str | None = Field(min_length=3, max_length=20, default=None)
-#     second_name: str | None = Field(min_length=3, max_length=20, default=None)
-#     age: int | None = Field(gt=16, le=100, default=None)
-#     status: int | None = Field(ge=0, le=4, default=None)
-#     desired_position: str | None = Field(min_length=4, max_length=30, default=None)
-#     education_degree: int | None = Field(ge=0, le=8, default=None)
-#     working_experience: str | None = Field(max_length=1000, default=None)
-#     about_oneself: str | None = Field(max_length=1000, default=None)
-#     published: bool | None = None
 
 
-class AddCandidates(UpdateCandidates):
-    skills: List[CRUDSkills] | None = None
+class AddCandidates(Candidates):
+    skills: List[Skills] | None = None
 
 
-class GetCandidate(AddCandidates):
+class GetCandidates(AddCandidates):
     time_create: datetime
+    skills: List[GetCandidatesSkills] | None = None
+    id: int
+
+
+class RequiredSkills(BaseModel):
+    skill_name: str = Field(min_length=3, max_length=30)
+    minimal_level: int
+    minimal_years_of_experience: int = Field(gt=0)
+
+
+@partial_model
+class PATCHRequiredSkills(RequiredSkills):
+    pass
+
+
+class GetJobOpeningsRequiredSkills(RequiredSkills):
+    id: int
+
+
+class GetRequiredSkills(RequiredSkills):
+    foreign_key: int
+
+
+class JobOpenings(BaseModel):
+    title: str = Field(min_length=4, max_length=40)
+    description: str = Field(max_length=1000)
+    address: str = Field(max_length=100)
+    salary: int = Field(gt=0)
+
+
+@partial_model
+class PATCHJobOpenings(JobOpenings):
+    pass
+
+
+class AddJobOpenings(JobOpenings):
+    skills: List[RequiredSkills] | None = None
+
+
+class GetJobOpenings(AddJobOpenings):
+    time_create: datetime
+    skills: List[GetJobOpeningsRequiredSkills] | None = None
+    id: int
