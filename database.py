@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import List
 from config import DB_USER, DB_HOST, DB_NAME, DB_PASS, DB_PORT
 
-from sqlalchemy import text, inspect, String, ForeignKey
+from sqlalchemy import text, String, ForeignKey
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -22,6 +22,7 @@ class CandidatesDB(Base):
     second_name = mapped_column(String(20), nullable=False)
     age: Mapped[int]
     status: Mapped[int]
+    city = mapped_column(String(20), nullable=False)
     desired_position = mapped_column(String(30), index=True, nullable=False)
     education_degree: Mapped[int]
     working_experience = mapped_column(String(1000))
@@ -29,17 +30,19 @@ class CandidatesDB(Base):
     published: Mapped[bool] = mapped_column(default=True)
     time_create: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now()) "))
 
-    skills: Mapped[List["SkillsDB"]] = relationship()
+    skills: Mapped[List["CandidatesSkillsDB"]] = relationship()
 
 
-class SkillsDB(Base):
-    __tablename__ = 'skills'
+class CandidatesSkillsDB(Base):
+    __tablename__ = 'candidates_skills'
 
-    foreign_key: Mapped[int] = mapped_column(ForeignKey("candidates.id", ondelete="CASCADE"))
-    skill_name = mapped_column(String(30), index=True, nullable=False)
+    foreign_key: Mapped[int] = mapped_column(ForeignKey("candidates.id", ondelete="CASCADE"), index=True)
+    skill_name = mapped_column(String(30), nullable=False)
+    indexing_skill_name = mapped_column(String(30), index=True, nullable=False)
     level: Mapped[int]
     years_of_experience: Mapped[int]
     last_used_year: Mapped[int]
+    score: Mapped[int]
 
 
 class JobOpeningsDB(Base):
@@ -52,24 +55,15 @@ class JobOpeningsDB(Base):
     time_create: Mapped[datetime] = mapped_column(server_default=text("TIMEZONE('utc', now()) "))
 
     skills: Mapped[List["RequiredSkillsDB"]] = relationship()
+    skills_quantity: Mapped[int]
 
 
 class RequiredSkillsDB(Base):
     __tablename__ = 'required_skills'
 
-    foreign_key: Mapped[int] = mapped_column(ForeignKey("job_openings.id", ondelete="CASCADE"))
+    foreign_key: Mapped[int] = mapped_column(ForeignKey("job_openings.id", ondelete="CASCADE"), index=True)
     skill_name = mapped_column(String(30), nullable=False)
-    minimal_level: Mapped[int]
-    minimal_years_of_experience: Mapped[int]
-
-
-async def create_table():
-    """
-    Create all tables.
-    """
-    async with engine.connect() as conn:
-        tables = await conn.run_sync(lambda sync_conn: inspect(sync_conn).get_table_names())
-
-    if not (CandidatesDB.__tablename__ in tables and SkillsDB.__tablename__ in tables):
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+    indexing_skill_name = mapped_column(String(30), index=True, nullable=False)
+    level: Mapped[int]
+    years_of_experience: Mapped[int]
+    score: Mapped[int]

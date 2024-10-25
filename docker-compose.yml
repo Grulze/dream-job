@@ -3,7 +3,7 @@ version: "3.8"
 services:
   db:
     image: postgres:16-alpine
-    container_name: db_app
+    container_name: jod_db
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
@@ -16,7 +16,7 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    container_name: item_cache
+    container_name: job_cache
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
@@ -27,7 +27,15 @@ services:
   app:
     build:
       context: .
-    container_name: my_shop_app
+    container_name: my_dream_job
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     ports:
       - 8000:8000
     depends_on:

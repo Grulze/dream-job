@@ -1,11 +1,11 @@
 FROM python:3.11-alpine
 
-RUN mkdir /items
+RUN mkdir /dream_job
 
-WORKDIR /items
+WORKDIR /dream_job
 
 COPY . .
 
 RUN pip install -r requirements.txt
 
-CMD ["uvicorn", "main:my_job", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["gunicorn", "main:my_job", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind=0.0.0.0:8000"]
