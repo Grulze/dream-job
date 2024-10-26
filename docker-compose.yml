@@ -17,6 +17,7 @@ services:
   redis:
     image: redis:7.4-alpine
     container_name: job_cache
+    command: ["redis-server", "--maxmemory", "200mb", "--maxmemory-policy", "allkeys-lru"]
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
