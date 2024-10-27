@@ -17,7 +17,7 @@ class SelectionOfCandidatesAndJobOpenings:
     router = APIRouter(prefix="", tags=["Selection of candidates and job openings"])
 
     @staticmethod
-    @router.get("/job-openings/{job_id}/selection")
+    @router.get("/job-openings/{job_id}/selection", response_model=List[GetCandidates])
     @cache(1, namespace="job_openings_selection")
     async def get_suitable_candidates(job_id: int, pagination: Pagination = Depends(),
                                       sorting_param: Sorting = Depends()) -> List[GetCandidates]:
@@ -36,7 +36,7 @@ class SelectionOfCandidatesAndJobOpenings:
         )
 
     @staticmethod
-    @router.get("/candidates/{candidate_id}/selection")
+    @router.get("/candidates/{candidate_id}/selection", response_model=List[GetJobOpenings])
     @cache(1, namespace="candidates_selection")
     async def get_suitable_job_openings(candidate_id: int, pagination: Pagination = Depends(),
                                         sorting_param: Sorting = Depends()) -> List[GetJobOpenings]:
@@ -59,7 +59,7 @@ class AllCandidatesAndJobOpenings:
     router = APIRouter(tags=["Get all candidates and job openings"])
 
     @staticmethod
-    @router.get("/candidates")
+    @router.get("/candidates", response_model=List[GetCandidates])
     @cache(1, namespace="all_candidates_with_pagination")
     async def get_all_candidates(pagination: Pagination = Depends()) -> List[GetCandidates]:
         """
@@ -71,7 +71,7 @@ class AllCandidatesAndJobOpenings:
         return await get_model_db(orm_table_class=CandidatesDB, lim=pagination.limit, page=pagination.page)
 
     @staticmethod
-    @router.get("/job-openings")
+    @router.get("/job-openings", response_model=List[GetJobOpenings])
     @cache(1, namespace="all_job_openings_with_pagination")
     async def get_job_openings(pagination: Pagination = Depends()) -> List[GetJobOpenings]:
         """
@@ -86,7 +86,7 @@ class CRUDCandidates:
     router = APIRouter(prefix="/candidates", tags=["CRUD candidates"])
 
     @staticmethod
-    @router.get("/{candidate_id}")
+    @router.get("/{candidate_id}", response_model=GetCandidates)
     @cache(1, namespace="candidates")
     async def get_candidates(candidate_id: int) -> GetCandidates:
         """
@@ -148,7 +148,7 @@ class RUDCandidatesSkills:
     router = APIRouter(prefix="/candidates/skills", tags=["RUD candidates skills"])
 
     @staticmethod
-    @router.get("/{skill_id}")
+    @router.get("/{skill_id}", response_model=GetCandidateSkills)
     @cache(1, namespace="candidates_skills")
     async def get_skills(skill_id: int) -> GetCandidateSkills:
         """
@@ -202,7 +202,7 @@ class CRCandidatesSkills:
     router = APIRouter(prefix="/candidates/{candidate_id}/skills", tags=["CR skills of a certain candidate"])
 
     @staticmethod
-    @router.get("")
+    @router.get("", response_model=List[GetAllCandidateSkills])
     @cache(1, namespace="all_candidates_skills")
     async def get_skills(candidate_id: int) -> List[GetAllCandidateSkills]:
         """
@@ -228,9 +228,9 @@ class CRUDJobOpenings:
     router = APIRouter(prefix="/job-openings", tags=["CRUD job openings"])
 
     @staticmethod
-    @router.get("/{job_openings_id}")
+    @router.get("/{job_openings_id}", response_model=GetJobOpenings)
     @cache(1, namespace="job_openings")
-    async def get_job_openings(job_openings_id: int):
+    async def get_job_openings(job_openings_id: int) -> GetJobOpenings:
         """
         Return job opening from database with the transmitted id.
         :param job_openings_id: id of job opening in database.
@@ -289,7 +289,7 @@ class RUDJobOpeningsSkills:
     router = APIRouter(prefix="/job-openings/skills", tags=["RUD job openings skills"])
 
     @staticmethod
-    @router.get("/{skill_id}")
+    @router.get("/{skill_id}", response_model=GetRequiredSkills)
     @cache(1, namespace="job_openings_skills")
     async def get_skills(skill_id: int) -> GetRequiredSkills:
         """
@@ -341,7 +341,7 @@ class CRJobOpeningsSkills:
     router = APIRouter(prefix="/job-openings/{job_openings_id}/skills", tags=["CR skills of a certain job opening"])
 
     @staticmethod
-    @router.get("")
+    @router.get("", response_model=List[GetJobOpeningsRequiredSkills])
     @cache(1, namespace="all_job_openings_skills")
     async def get_skills(job_openings_id: int) -> List[GetJobOpeningsRequiredSkills]:
         """
