@@ -1,8 +1,8 @@
 from sqlalchemy import inspect
 
-from database import engine, CandidatesDB, JobOpeningsDB, RequiredSkillsDB, CandidatesSkillsDB, Base
-from request_db import add_model_db
-from schema import AddCandidates, AddJobOpenings, AddRequiredSkills, AddCandidateSkills
+from core.db.database import engine, CandidatesDB, JobOpeningsDB, RequiredSkillsDB, CandidatesSkillsDB, Base
+from core.db.request_db import add_model_db
+from core.schemas import AddCandidates, AddJobOpenings, AddRequiredSkills, AddCandidateSkills
 
 candidates = [
     AddCandidates(

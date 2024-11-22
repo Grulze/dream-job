@@ -5,9 +5,9 @@ from sqlalchemy import select, update, delete, insert, func, desc, asc
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 
-from database import CandidatesDB, CandidatesSkillsDB, session, Base, JobOpeningsDB, RequiredSkillsDB
-from schema import GetCandidateSkills, GetCandidates, GetJobOpenings, GetRequiredSkills
-from custom_exceptions import non_existent_object, non_existing_foreign_key
+from core.db.database import CandidatesDB, CandidatesSkillsDB, session, Base, JobOpeningsDB, RequiredSkillsDB
+from core.schemas import GetCandidateSkills, GetCandidates, GetJobOpenings, GetRequiredSkills
+from core.custom_exceptions import non_existent_object, non_existing_foreign_key
 
 
 async def get_model_db(orm_table_class: Type[Base], record_id_db: int | None = None, lim: int | None = None,

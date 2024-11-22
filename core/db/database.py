@@ -1,13 +1,13 @@
 from datetime import datetime
 from typing import List
-from config import DB_USER, DB_HOST, DB_NAME, DB_PASS, DB_PORT
+from core.config import DB_USER, DB_HOST, DB_NAME, DB_PASS, DB_PORT
 
 from sqlalchemy import text, String, ForeignKey
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
-engine = create_async_engine(f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}", echo=True)
+engine = create_async_engine(f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}", echo=False)
 session = async_sessionmaker(engine, expire_on_commit=False)
 
 
